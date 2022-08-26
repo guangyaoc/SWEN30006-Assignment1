@@ -2,18 +2,18 @@ package src;// Tetris.java
 
 import ch.aplu.jgamegrid.*;
 
-import java.security.Key;
+
 import java.util.*;
 import java.awt.event.KeyEvent;
 import java.awt.*;
-import java.util.List;
 import javax.swing.*;
 
 public class Tetris extends JFrame implements GGActListener {
 
-    private Actor currentBlock = null;  // Currently active block
+    private Actor currentBlock = null ;  // Currently active block
     private Actor blockPreview = null;   // block in preview window
     private int score = 0;
+    //slow 有控制速度的用法
     private int slowDown = 5;
     private Random random = new Random(0);
 
@@ -27,7 +27,7 @@ public class Tetris extends JFrame implements GGActListener {
     private String [] blockActions = new String[10];
     private int blockActionIndex = 0;
 
-    // Initialise object
+    // Initialise object 初始化游戏property
     private void initWithProperties(Properties properties) {
         this.seed = Integer.parseInt(properties.getProperty("seed", "30006"));
         random = new Random(seed);
@@ -36,6 +36,7 @@ public class Tetris extends JFrame implements GGActListener {
         blockActions = blockActionProperty.split(",");
     }
 
+    //UI部分不需要改
     public Tetris(TetrisGameCallback gameCallback, Properties properties) {
         // Initialise value
         initWithProperties(properties);
@@ -49,11 +50,16 @@ public class Tetris extends JFrame implements GGActListener {
         gameGrid1.setSimulationPeriod(getSimulationTime());
 
         // Add the first block to start
+
+        //此处生成了一个block
         currentBlock = createRandomTetrisBlock();
+
         gameGrid1.addActor(currentBlock, new Location(6, 0));
         gameGrid1.doRun();
 
         // Do not lose keyboard focus when clicking this window
+        // 查是false么
+        //gamegrid 1,2是不能动的
         gameGrid2.setFocusable(false);
         setTitle("SWEN30006 Tetris Madness");
         score = 0;
@@ -61,12 +67,24 @@ public class Tetris extends JFrame implements GGActListener {
         slowDown = 5;
     }
 
+
+    private void SetAutoAndSetPreview(String currentBlockMove, Actor t, fatherOfBlocks preview) {
+        if (isAuto) {
+            ((fatherOfBlocks) t).setAutoBlockMove(currentBlockMove);
+        }
+        preview.display(gameGrid2, new Location(2, 1));
+        blockPreview = preview;
+    }
+
     // create a block and assign to a preview mode
     Actor createRandomTetrisBlock() {
+        //清空preview图窗户
         if (blockPreview != null)
             blockPreview.removeSelf();
 
         // If the game is in auto test mode, then the block will be moved according to the blockActions
+
+        //currentblockmove 是个string，与 IJLOST里的setAutoBlockMove联合使用
         String currentBlockMove = "";
         if (blockActions.length > blockActionIndex) {
             currentBlockMove = blockActions[blockActionIndex];
@@ -74,78 +92,58 @@ public class Tetris extends JFrame implements GGActListener {
 
         blockActionIndex++;
         Actor t = null;
+
         int rnd = random.nextInt(7);
+
+        //currentblockmove 是个string，与 IJLOST里父类的的setAutoBlockMove联合使用
+
         switch (rnd) {
             case 0:
                 t = new I(this);
-                if (isAuto) {
-                    ((I) t).setAutoBlockMove(currentBlockMove);
-                }
-
                 I previewI = new I(this);
-                previewI.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewI;
+
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewI);
+
                 break;
             case 1:
                 t = new J(this);
-                if (isAuto) {
-                    ((J) t).setAutoBlockMove(currentBlockMove);
-                }
                 J previewJ = new J(this);
-                previewJ.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewJ;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewJ);
                 break;
             case 2:
                 t = new L(this);
-                if (isAuto) {
-                    ((L) t).setAutoBlockMove(currentBlockMove);
-                }
                 L previewL = new L(this);
-                previewL.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewL;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewL);
                 break;
             case 3:
                 t = new O(this);
-                if (isAuto) {
-                    ((O) t).setAutoBlockMove(currentBlockMove);
-                }
                 O previewO = new O(this);
-                previewO.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewO;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewO);
                 break;
             case 4:
                 t = new S(this);
-                if (isAuto) {
-                    ((S) t).setAutoBlockMove(currentBlockMove);
-                }
                 S previewS = new S(this);
-                previewS.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewS;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewS);
                 break;
             case 5:
                 t = new T(this);
-                if (isAuto) {
-                    ((T) t).setAutoBlockMove(currentBlockMove);
-                }
                 T previewT = new T(this);
-                previewT.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewT;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewT);
                 break;
             case 6:
                 t = new Z(this);
-                if (isAuto) {
-                    ((Z) t).setAutoBlockMove(currentBlockMove);
-                }
                 Z previewZ = new Z(this);
-                previewZ.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewZ;
+                SetAutoAndSetPreview(currentBlockMove, (fatherOfBlocks) t, previewZ);
                 break;
         }
+        
         // Show preview tetrisBlock
-
         t.setSlowDown(slowDown);
         return t;
     }
+
+    
+
 
     void setCurrentTetrisBlock(Actor t) {
         gameCallback.changeOfBlock(currentBlock);
@@ -154,132 +152,36 @@ public class Tetris extends JFrame implements GGActListener {
 
     // Handle user input to move block. Arrow left to move left, Arrow right to move right, Arrow up to rotate and
     // Arrow down for going down
+
+
     private void moveBlock(int keyEvent) {
-        if (currentBlock instanceof I) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((I) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((I) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((I) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((I) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof J) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((J) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((J) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((J) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((J) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof L) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((L) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((L) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((L) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((L) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof O) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((O) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((O) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((O) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((O) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof S) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((S) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((S) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((S) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((S) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof T) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((T) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((T) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((T) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((T) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
-        } else if (currentBlock instanceof Z) {
-            switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    ((Z) currentBlock).rotate();
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((Z) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((Z) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((Z) currentBlock).drop();
-                    break;
-                default:
-                    return;
-            }
+        switch (keyEvent) {
+            case KeyEvent.VK_UP:
+                ((fatherOfBlocks) currentBlock).rotate();
+                break;
+            case KeyEvent.VK_LEFT:
+                ((fatherOfBlocks) currentBlock).left();
+                break;
+            case KeyEvent.VK_RIGHT:
+                ((fatherOfBlocks) currentBlock).right();
+                break;
+            case KeyEvent.VK_DOWN:
+                ((fatherOfBlocks) currentBlock).drop();
+                break;
+            default:
+                return;
         }
     }
+
+
+    //无此act（）上下左右键动不了
     public void act() {
         removeFilledLine();
         moveBlock(gameGrid1.getKeyCode());
     }
+
+
+    //有设置速度的内容
     private void removeFilledLine() {
         for (int y = 0; y < gameGrid1.nbVertCells; y++) {
             boolean isLineComplete = true;
@@ -376,6 +278,10 @@ public class Tetris extends JFrame implements GGActListener {
             return 2000;
         }
     }
+
+
+
+
 
     // AUTO GENERATED - do not modify//GEN-BEGIN:variables
     public ch.aplu.jgamegrid.GameGrid gameGrid1;

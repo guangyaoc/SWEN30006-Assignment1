@@ -17,6 +17,7 @@ public class TetroBlock extends Actor
     return relLoc[rotId];
   }
 
+
   /**
    * Do not change this method. For testing and marking purpose
    * @return

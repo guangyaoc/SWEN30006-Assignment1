@@ -2,6 +2,7 @@ package src;
 
 public class TetrisComponents {
     // AUTO GENERATED - do not modify//GEN-BEGIN:variables
+    // 千万不要动
     public void initComponents(Tetris tetris) {
         tetris.jPanel1 = new javax.swing.JPanel();
         tetris.gameGrid2 = new ch.aplu.jgamegrid.GameGrid();
